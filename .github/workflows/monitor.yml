@@ -1,0 +1,41 @@
+name: Amazon Product Monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository indir
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Paketleri yükle
+        run: pip install requests beautifulsoup4
+
+      - name: Amazon kontrolü
+        run: python tracker.py
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Ürün listesini kaydet
+        run: |
+          if [ -f products.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add products.json
+            git diff --cached --quiet || git commit -m "Update product tracking state"
+            git push
+          fi
