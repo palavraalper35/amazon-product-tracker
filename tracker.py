@@ -14,6 +14,9 @@ def get_products():
     }
 
     response = requests.get(AMAZON_URL, headers=headers, timeout=30)
+    print("HTTP STATUS:", response.status_code)
+print("FINAL URL:", response.url)
+print("PAGE START:", response.text[:500])
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
